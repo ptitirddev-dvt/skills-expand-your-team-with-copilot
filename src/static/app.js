@@ -475,6 +475,25 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
+  // Helper function to sanitize text for safe use
+  function sanitizeText(text) {
+    // Remove any HTML tags and convert HTML entities to plain text
+    const div = document.createElement('div');
+    div.innerHTML = text;
+    return div.textContent || div.innerText || '';
+  }
+
+  // Helper function to show button feedback
+  function showButtonFeedback(button) {
+    const originalTitle = button.title;
+    button.title = "Copied!";
+    button.style.backgroundColor = "var(--success)";
+    setTimeout(() => {
+      button.title = originalTitle;
+      button.style.backgroundColor = "";
+    }, 2000);
+  }
+
   // Helper function to escape HTML entities
   function escapeHtml(text) {
     const div = document.createElement('div');
@@ -540,19 +559,19 @@ document.addEventListener("DOMContentLoaded", () => {
       ${capacityIndicator}
       <div class="share-buttons">
         <span class="share-label">Share:</span>
-        <button class="share-button share-twitter" data-activity="${escapeHtml(name)}" data-description="${escapeHtml(details.description)}" data-schedule="${escapeHtml(formattedSchedule)}" title="Share on Twitter">
+        <button class="share-button share-twitter" data-activity="${name}" data-description="${details.description}" data-schedule="${formattedSchedule}" title="Share on Twitter">
           𝕏
         </button>
-        <button class="share-button share-facebook" data-activity="${escapeHtml(name)}" data-description="${escapeHtml(details.description)}" data-schedule="${escapeHtml(formattedSchedule)}" title="Share on Facebook">
+        <button class="share-button share-facebook" data-activity="${name}" data-description="${details.description}" data-schedule="${formattedSchedule}" title="Share on Facebook">
           f
         </button>
-        <button class="share-button share-linkedin" data-activity="${escapeHtml(name)}" data-description="${escapeHtml(details.description)}" data-schedule="${escapeHtml(formattedSchedule)}" title="Share on LinkedIn">
+        <button class="share-button share-linkedin" data-activity="${name}" data-description="${details.description}" data-schedule="${formattedSchedule}" title="Share on LinkedIn">
           in
         </button>
-        <button class="share-button share-email" data-activity="${escapeHtml(name)}" data-description="${escapeHtml(details.description)}" data-schedule="${escapeHtml(formattedSchedule)}" title="Share via Email">
+        <button class="share-button share-email" data-activity="${name}" data-description="${details.description}" data-schedule="${formattedSchedule}" title="Share via Email">
           ✉
         </button>
-        <button class="share-button share-copy" data-activity="${escapeHtml(name)}" data-description="${escapeHtml(details.description)}" data-schedule="${escapeHtml(formattedSchedule)}" title="Copy link">
+        <button class="share-button share-copy" data-activity="${name}" data-description="${details.description}" data-schedule="${formattedSchedule}" title="Copy link">
           🔗
         </button>
       </div>
@@ -907,15 +926,24 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Social sharing functions
   function shareOnTwitter(activityName, description, schedule) {
-    const text = `Check out ${activityName} at ${SCHOOL_NAME}! ${description} - Schedule: ${schedule}`;
+    // Sanitize inputs to prevent XSS
+    const safeName = sanitizeText(activityName);
+    const safeDescription = sanitizeText(description);
+    const safeSchedule = sanitizeText(schedule);
+    
+    const text = `Check out ${safeName} at ${SCHOOL_NAME}! ${safeDescription} - Schedule: ${safeSchedule}`;
     const url = window.location.href;
     const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`;
     window.open(twitterUrl, '_blank', 'width=600,height=400');
   }
 
   function shareOnFacebook(activityName, description) {
+    // Sanitize inputs to prevent XSS
+    const safeName = sanitizeText(activityName);
+    const safeDescription = sanitizeText(description);
+    
     const url = window.location.href;
-    const facebookUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}&quote=${encodeURIComponent(`${activityName}: ${description}`)}`;
+    const facebookUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}&quote=${encodeURIComponent(`${safeName}: ${safeDescription}`)}`;
     window.open(facebookUrl, '_blank', 'width=600,height=400');
   }
 
@@ -926,27 +954,29 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function shareViaEmail(activityName, description, schedule) {
-    const subject = `Check out ${activityName} at ${SCHOOL_NAME}`;
-    const body = `I wanted to share this activity with you:\n\n${activityName}\n\n${description}\n\nSchedule: ${schedule}\n\nLearn more at: ${window.location.href}`;
+    // Sanitize inputs to prevent XSS
+    const safeName = sanitizeText(activityName);
+    const safeDescription = sanitizeText(description);
+    const safeSchedule = sanitizeText(schedule);
+    
+    const subject = `Check out ${safeName} at ${SCHOOL_NAME}`;
+    const body = `I wanted to share this activity with you:\n\n${safeName}\n\n${safeDescription}\n\nSchedule: ${safeSchedule}\n\nLearn more at: ${window.location.href}`;
     const mailtoUrl = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
     window.location.href = mailtoUrl;
   }
 
   function copyShareLink(activityName, description, button) {
-    const shareText = `${activityName} at ${SCHOOL_NAME} - ${description}\n${window.location.href}`;
+    // Sanitize inputs to prevent XSS
+    const safeName = sanitizeText(activityName);
+    const safeDescription = sanitizeText(description);
+    
+    const shareText = `${safeName} at ${SCHOOL_NAME} - ${safeDescription}\n${window.location.href}`;
     
     // Try to use the modern clipboard API
     if (navigator.clipboard && navigator.clipboard.writeText) {
       navigator.clipboard.writeText(shareText).then(() => {
         showMessage("Link copied to clipboard!", "success");
-        // Visual feedback on button
-        const originalTitle = button.title;
-        button.title = "Copied!";
-        button.style.backgroundColor = "var(--success)";
-        setTimeout(() => {
-          button.title = originalTitle;
-          button.style.backgroundColor = "";
-        }, 2000);
+        showButtonFeedback(button);
       }).catch((err) => {
         console.error("Failed to copy:", err);
         showMessage("Failed to copy link", "error");
@@ -963,14 +993,7 @@ document.addEventListener("DOMContentLoaded", () => {
       try {
         document.execCommand("copy");
         showMessage("Link copied to clipboard!", "success");
-        // Visual feedback on button
-        const originalTitle = button.title;
-        button.title = "Copied!";
-        button.style.backgroundColor = "var(--success)";
-        setTimeout(() => {
-          button.title = originalTitle;
-          button.style.backgroundColor = "";
-        }, 2000);
+        showButtonFeedback(button);
       } catch (err) {
         console.error("Failed to copy:", err);
         showMessage("Failed to copy link", "error");
