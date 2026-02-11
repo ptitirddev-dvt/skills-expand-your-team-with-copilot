@@ -559,19 +559,19 @@ document.addEventListener("DOMContentLoaded", () => {
       ${capacityIndicator}
       <div class="share-buttons">
         <span class="share-label">Share:</span>
-        <button class="share-button share-twitter" data-activity="${name}" data-description="${details.description}" data-schedule="${formattedSchedule}" title="Share on Twitter">
+        <button class="share-button share-twitter" data-activity="${escapeHtml(name)}" data-description="${escapeHtml(details.description)}" data-schedule="${escapeHtml(formattedSchedule)}" title="Share on Twitter">
           𝕏
         </button>
-        <button class="share-button share-facebook" data-activity="${name}" data-description="${details.description}" data-schedule="${formattedSchedule}" title="Share on Facebook">
+        <button class="share-button share-facebook" data-activity="${escapeHtml(name)}" data-description="${escapeHtml(details.description)}" data-schedule="${escapeHtml(formattedSchedule)}" title="Share on Facebook">
           f
         </button>
-        <button class="share-button share-linkedin" data-activity="${name}" data-description="${details.description}" data-schedule="${formattedSchedule}" title="Share on LinkedIn">
+        <button class="share-button share-linkedin" data-activity="${escapeHtml(name)}" data-description="${escapeHtml(details.description)}" data-schedule="${escapeHtml(formattedSchedule)}" title="Share on LinkedIn">
           in
         </button>
-        <button class="share-button share-email" data-activity="${name}" data-description="${details.description}" data-schedule="${formattedSchedule}" title="Share via Email">
+        <button class="share-button share-email" data-activity="${escapeHtml(name)}" data-description="${escapeHtml(details.description)}" data-schedule="${escapeHtml(formattedSchedule)}" title="Share via Email">
           ✉
         </button>
-        <button class="share-button share-copy" data-activity="${name}" data-description="${details.description}" data-schedule="${formattedSchedule}" title="Copy link">
+        <button class="share-button share-copy" data-activity="${escapeHtml(name)}" data-description="${escapeHtml(details.description)}" data-schedule="${escapeHtml(formattedSchedule)}" title="Copy link">
           🔗
         </button>
       </div>
@@ -647,7 +647,7 @@ document.addEventListener("DOMContentLoaded", () => {
         } else if (button.classList.contains("share-facebook")) {
           shareOnFacebook(activityName, description);
         } else if (button.classList.contains("share-linkedin")) {
-          shareOnLinkedIn(activityName, description);
+          shareOnLinkedIn();
         } else if (button.classList.contains("share-email")) {
           shareViaEmail(activityName, description, schedule);
         } else if (button.classList.contains("share-copy")) {
@@ -947,7 +947,8 @@ document.addEventListener("DOMContentLoaded", () => {
     window.open(facebookUrl, '_blank', 'width=600,height=400');
   }
 
-  function shareOnLinkedIn(activityName, description) {
+  function shareOnLinkedIn() {
+    // LinkedIn share only needs the URL
     const url = window.location.href;
     const linkedinUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}`;
     window.open(linkedinUrl, '_blank', 'width=600,height=400');
