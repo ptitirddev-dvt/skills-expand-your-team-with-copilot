@@ -869,7 +869,7 @@ document.addEventListener("DOMContentLoaded", () => {
   function initializeDarkMode() {
     // Check for saved dark mode preference
     const savedDarkMode = localStorage.getItem("darkMode");
-    const prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+    const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
     
     // Apply dark mode if it was saved or if user prefers dark mode and hasn't set a preference
     if (savedDarkMode === "enabled" || (savedDarkMode === null && prefersDark)) {
