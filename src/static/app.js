@@ -44,6 +44,9 @@ document.addEventListener("DOMContentLoaded", () => {
   // Authentication state
   let currentUser = null;
 
+  // Constants
+  const SCHOOL_NAME = "Mergington High School";
+
   // Time range mappings for the dropdown
   const timeRanges = {
     morning: { start: "06:00", end: "08:00" }, // Before school hours
@@ -472,6 +475,13 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
+  // Helper function to escape HTML entities
+  function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+  }
+
   // Function to render a single activity card
   function renderActivityCard(name, details) {
     const activityCard = document.createElement("div");
@@ -530,19 +540,19 @@ document.addEventListener("DOMContentLoaded", () => {
       ${capacityIndicator}
       <div class="share-buttons">
         <span class="share-label">Share:</span>
-        <button class="share-button share-twitter" data-activity="${name}" data-description="${details.description.replace(/"/g, '&quot;')}" data-schedule="${formattedSchedule.replace(/"/g, '&quot;')}" title="Share on Twitter">
+        <button class="share-button share-twitter" data-activity="${escapeHtml(name)}" data-description="${escapeHtml(details.description)}" data-schedule="${escapeHtml(formattedSchedule)}" title="Share on Twitter">
           𝕏
         </button>
-        <button class="share-button share-facebook" data-activity="${name}" data-description="${details.description.replace(/"/g, '&quot;')}" data-schedule="${formattedSchedule.replace(/"/g, '&quot;')}" title="Share on Facebook">
+        <button class="share-button share-facebook" data-activity="${escapeHtml(name)}" data-description="${escapeHtml(details.description)}" data-schedule="${escapeHtml(formattedSchedule)}" title="Share on Facebook">
           f
         </button>
-        <button class="share-button share-linkedin" data-activity="${name}" data-description="${details.description.replace(/"/g, '&quot;')}" data-schedule="${formattedSchedule.replace(/"/g, '&quot;')}" title="Share on LinkedIn">
+        <button class="share-button share-linkedin" data-activity="${escapeHtml(name)}" data-description="${escapeHtml(details.description)}" data-schedule="${escapeHtml(formattedSchedule)}" title="Share on LinkedIn">
           in
         </button>
-        <button class="share-button share-email" data-activity="${name}" data-description="${details.description.replace(/"/g, '&quot;')}" data-schedule="${formattedSchedule.replace(/"/g, '&quot;')}" title="Share via Email">
+        <button class="share-button share-email" data-activity="${escapeHtml(name)}" data-description="${escapeHtml(details.description)}" data-schedule="${escapeHtml(formattedSchedule)}" title="Share via Email">
           ✉
         </button>
-        <button class="share-button share-copy" data-activity="${name}" data-description="${details.description.replace(/"/g, '&quot;')}" data-schedule="${formattedSchedule.replace(/"/g, '&quot;')}" title="Copy link">
+        <button class="share-button share-copy" data-activity="${escapeHtml(name)}" data-description="${escapeHtml(details.description)}" data-schedule="${escapeHtml(formattedSchedule)}" title="Copy link">
           🔗
         </button>
       </div>
@@ -897,7 +907,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Social sharing functions
   function shareOnTwitter(activityName, description, schedule) {
-    const text = `Check out ${activityName} at Mergington High School! ${description} - Schedule: ${schedule}`;
+    const text = `Check out ${activityName} at ${SCHOOL_NAME}! ${description} - Schedule: ${schedule}`;
     const url = window.location.href;
     const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`;
     window.open(twitterUrl, '_blank', 'width=600,height=400');
@@ -916,14 +926,14 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function shareViaEmail(activityName, description, schedule) {
-    const subject = `Check out ${activityName} at Mergington High School`;
+    const subject = `Check out ${activityName} at ${SCHOOL_NAME}`;
     const body = `I wanted to share this activity with you:\n\n${activityName}\n\n${description}\n\nSchedule: ${schedule}\n\nLearn more at: ${window.location.href}`;
     const mailtoUrl = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
     window.location.href = mailtoUrl;
   }
 
   function copyShareLink(activityName, description, button) {
-    const shareText = `${activityName} at Mergington High School - ${description}\n${window.location.href}`;
+    const shareText = `${activityName} at ${SCHOOL_NAME} - ${description}\n${window.location.href}`;
     
     // Try to use the modern clipboard API
     if (navigator.clipboard && navigator.clipboard.writeText) {
@@ -932,7 +942,7 @@ document.addEventListener("DOMContentLoaded", () => {
         // Visual feedback on button
         const originalTitle = button.title;
         button.title = "Copied!";
-        button.style.backgroundColor = "#2e7d32";
+        button.style.backgroundColor = "var(--success)";
         setTimeout(() => {
           button.title = originalTitle;
           button.style.backgroundColor = "";
@@ -942,7 +952,8 @@ document.addEventListener("DOMContentLoaded", () => {
         showMessage("Failed to copy link", "error");
       });
     } else {
-      // Fallback for older browsers
+      // Fallback for older browsers using deprecated execCommand
+      // Note: execCommand is deprecated but kept as fallback for browsers without clipboard API
       const textarea = document.createElement("textarea");
       textarea.value = shareText;
       textarea.style.position = "fixed";
@@ -955,7 +966,7 @@ document.addEventListener("DOMContentLoaded", () => {
         // Visual feedback on button
         const originalTitle = button.title;
         button.title = "Copied!";
-        button.style.backgroundColor = "#2e7d32";
+        button.style.backgroundColor = "var(--success)";
         setTimeout(() => {
           button.title = originalTitle;
           button.style.backgroundColor = "";
